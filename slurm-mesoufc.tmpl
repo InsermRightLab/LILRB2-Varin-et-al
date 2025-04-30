@@ -1,0 +1,24 @@
+#!/bin/bash
+
+## This file is provided as an addition to the Jupyter Notebook code supplementing our manuscript and shared on GitHub at https://github.com/InsermRightLab/LILRB2-Varin-et-al
+## It is used by the R package batchtools and is specifically tailored to submit jobs to the Slurm scheduler of the Mésocentre de Franche-Comté's HPC cluster
+
+<%
+# relative paths are not handled well by Slurm
+log.file = fs::path_expand(log.file)
+-%>
+
+#SBATCH --job-name=<%= resources$job.name %>
+#SBATCH --output=<%= log.file %>
+#SBATCH --error=<%= log.file %>
+#SBATCH --time=<%= resources$walltime %>
+#SBATCH --partition=<%= resources$partition %>
+#SBATCH --cpus-per-task=<%= resources$ncpus %>
+#SBATCH --mem=<%= resources$memory %>
+
+## Export value of DEBUGME environment var to slave
+export DEBUGME=<%= Sys.getenv("DEBUGME") %>
+
+## Run R:
+## we merge R output with stdout from SLURM which gets then logged via --output option
+Rscript -e 'batchtools::doJobCollection("<%= uri %>")'
